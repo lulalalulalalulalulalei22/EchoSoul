@@ -4,7 +4,6 @@ EchoSoul - 情绪伴侣 AI 网页版
 """
 import streamlit as st
 from openai import OpenAI
-
 # ==================== 页面配置 ====================
 st.set_page_config(
     page_title="EchoSoul - 你的情绪伴侣",
@@ -16,6 +15,31 @@ st.set_page_config(
 # ==================== 自定义样式 ====================
 st.markdown("""
 <style>
+   /* 1. 针对新版 Streamlit：隐藏左上角的 > 箭头 */
+        [data-testid="stSidebarCollapsedControl"] {
+            display: none !important;
+        }
+        
+        /* 2. 针对旧版 Streamlit：隐藏左上角的 > 箭头 */
+        [data-testid="collapsedControl"] {
+            display: none !important;
+        }
+
+        /* 3. 隐藏侧边栏顶部的 X 关闭按钮 (如果有的话) */
+        section[data-testid="stSidebar"] button[kind="header"] {
+            display: none !important;
+        }
+
+        /* 4. 暴力隐藏所有头部 Header 里的按钮（防止漏网之鱼） */
+        header[data-testid="stHeader"] {
+            background-color: rgba(0,0,0,0) !important; /* 让顶栏透明 */
+            z-index: -1 !important; /* 把它沉到地底下去 */
+        }
+        
+        /* 5. 调整侧边栏顶部留白，因为隐藏了 Header 可能会有点秃 */
+        section[data-testid="stSidebar"] .block-container {
+            padding-top: 2rem !important;
+        }    
     /* 1. 整体背景 - 深邃星空渐变 */
     .stApp {
         background: radial-gradient(circle at 50% 50%, #1a1a3a 0%, #0f0c29 100%) !important;
@@ -65,7 +89,7 @@ st.markdown("""
         border-radius: 10px !important;
         caret-color: #000000 !important; /* 光标也变黑 */
     }
-
+    
     /* 5. 底部聊天输入框专项修复 - 字变黑色 */
     .stChatInputContainer {
         background: rgba(255, 255, 255, 0.95) !important; /* 浅色背景 */
@@ -100,6 +124,8 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
+
+ 
 # ==================== API 配置 (完善版) ====================
 
 # 1. 这里的第二个参数千万不能放真实的 Key，只能放空字符串 "" 或者 None
@@ -136,7 +162,10 @@ BASE_SYSTEM_PROMPT = """# Echosoul System Prompt
 - 不引导用户做任何不符合社会价值观的事情
 - 不鼓励自我伤害、伤害他人、违法行为
 - 如果用户表现出严重的心理危机迹象，温和地建议寻求专业帮助，但不强迫、不说教
-
+### 4. 关键输出规则（至关重要！）
+1. **严禁输出结构标签**：你的回复必须是自然的对话。**绝对不要**在句首加上 (先接住情绪)、(提供新视角)、(给出建议) 等括号说明文字。
+2. **结构要隐形**：虽然你心里要按照 "共情 -> 视角 -> 建议" 的逻辑思考，但这个逻辑必须隐藏在文字背后，不要打印出来。
+3. **自然像人**：不要让用户看出你在套模板。
 ---
 
 ## 默认语言风格
@@ -272,7 +301,7 @@ Echosoul 的默认风格是：**温暖、有结构、给方向**
 ---
 
 ## 记住
-
+请严格遵守 System 指令中的字数限制。
 你不需要完美。你需要的是：真诚地在场，认真地回应，灵活地调整。
 
 让每一个来找你的人感到：有人愿意听，有人在乎，这一刻他们不是孤单的。"""
